@@ -1,0 +1,160 @@
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class ShortestCommonSuperString
+{
+    public static void main(String[] args)
+    {
+        try
+        {
+            if(args.length < 1 || (args.length == 1 && Integer.parseInt(args[0]) < 1)) //noch mehr abfangen maybe??
+            {
+                throw new IllegalArgumentException();
+            }
+            ArrayList<String> help = new ArrayList<String>();
+            if(args.length > 1)
+            {
+                boolean lessbuchstaben = false;
+                for(int i = 0; i<args.length; i++) //Ueberpruefen, ob alle Objekte mehr als zwei Buchstaben haben
+                {
+                    if(args[i].length() < 2)
+                    {
+                        lessbuchstaben = true;
+                        break;
+                    }
+                }
+                if(lessbuchstaben)
+                {
+                    throw new IllegalArgumentException();
+                }
+                toUpperCase(args);
+                Collections.addAll(help, args); //Hilfsarray
+            }
+            
+            else if(args.length == 1)
+            {
+                int stringcount = Integer.parseInt(args[0]);
+                String[] random = new String[stringcount];
+                for(int i = 0; i < stringcount; i++)
+                {
+                    random[i] = generateRandomString();
+                }
+                toUpperCase(random);
+                Collections.addAll(help, random); //Hilfsarray
+            }
+            
+            
+            if(help.size() < 11) 
+            {
+                while(help.size() != 1)
+                {
+                    String joined = String.join(" ", help);
+                    System.out.println(joined);
+                    int[] werte = SuperStringValues(help);
+                    String newword = combinedword(help, werte[1], werte[2], werte[0]);
+                    System.out.println("Ersetze " + help.get(werte[1]) + " und " + help.get(werte[2]) + " durch " + newword);
+                    
+                    help.remove(Math.max(werte[1],werte[2]));
+                    help.remove(Math.min(werte[1],werte[2]));
+                    help.add(newword);
+                }
+                String joined = String.join(" ", help);
+                System.out.println(joined);
+            }
+            else
+            {
+                while(help.size() != 1)
+                {
+                    int[] werte = SuperStringValues(help); 
+                    String newword = combinedword(help, werte[1], werte[2], werte[0]);
+                    help.remove(Math.max(werte[1],werte[2]));
+                    help.remove(Math.min(werte[1],werte[2]));
+                    help.add(newword);
+                }
+            }
+            System.out.println("Superstring " + help.get(0) + " mit Laenge " + help.get(0).length() + " gefunden.");
+            System.exit(0);
+        }
+        catch(IllegalArgumentException e)
+        {
+            System.out.println("FEHLER: Bitte eine natürliche Zahl oder mit Leerzeichen getrennte Argumente übergeben");
+        }
+    }
+    
+    public static int[] SuperStringValues(ArrayList<String> args) //Werte der beiden Objekten mit groesster Uebereinstimmung speichern zum eventuellen Ausgeben
+    {
+        int max1 = 0;
+        int max2 = 0;
+        int first = 0;
+        int second = 0;
+        int[] maxobjects = new int[3]; 
+        for(int i = 0; i < args.size(); i++) //Suchen der beiden Objekte mit groesster Uebereinstimmung
+        {
+            for( int n = 0; n < args.size(); n++)
+            {
+                if(n != i)
+                {
+                    max2 = stringOverlap(args.get(i),args.get(n));
+                    if(max2 > max1)
+                    {
+                        max1 = max2;
+                        first = i;
+                        second = n;
+                    }
+                }
+            }
+        }
+        maxobjects[0] = max1;
+        maxobjects[1] = first;
+        maxobjects[2] = second;
+        return maxobjects;
+    }
+    
+    public static String combinedword(ArrayList<String> args, int i, int j, int max) //Objekte kombinieren
+    {
+        String combined = args.get(i).substring(0, args.get(i).length()-max);
+        combined = combined + args.get(j);
+        return combined;
+    }
+    
+    public static int stringOverlap(String str1, String str2) //maximaler Wert an gleichen Charakteren herausfinden
+    {
+        int m = str1.length() - 1;
+        int n = str2.length() - 1;
+        int max = 0;
+        int end = Math.min(m,n);
+        
+        for(int i=0; i <= end ;i++)
+        {
+            if( str1.substring(m-i, m).equals(str2.substring(0,i))) //SOSAFFENALARM springt bei 0 gleichen auch in diesen fall hilfe was tun
+            {
+                max = i+1;
+            }
+        }
+        return max;
+    }
+    
+    public static String[] toUpperCase(String[] args) //String[] in Grossbuchstaben
+    {
+        for(int i = 0; i< args.length; i++)
+            {
+                args[i] = args[i].toUpperCase();
+            }
+        return args;
+    }
+    
+    public static String generateRandomString() //kopierte Methode
+    {
+        String alphabet = "ABCD";
+        Random numberGenerator = new java.util.Random();
+        StringBuilder builder = new StringBuilder();
+        int length = 3 + numberGenerator.nextInt(4);
+        while (length-- > 0)
+        {
+            int randomIdx = numberGenerator.nextInt(alphabet.length());
+            builder.append(alphabet.charAt(randomIdx));
+        }
+        return builder.toString();
+    }
+}
